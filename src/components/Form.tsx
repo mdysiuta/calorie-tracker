@@ -1,16 +1,25 @@
 // Componente de formulario
 
-import { useState } from "react"
+import { useState, type Dispatch } from "react"
+import { v4 as uuidv4 } from 'uuid'
 import { categories } from "../data/categories"
 import type { Activity } from "../types"
+import type { ActivityActions } from "../reducers/activity-reducer"
 
-export default function Form() {
+type FormProps = {
+    dispatch : Dispatch<ActivityActions>
+}
 
-    const [activity, setActivity] = useState<Activity>({
-        category:   1,
-        name:       '',
-        calories:   0,
-    })
+const initialState : Activity = {
+    id:         uuidv4(),
+    category:   1,
+    name:       '',
+    calories:   0,    
+}
+
+export default function Form({dispatch} : FormProps) {
+
+    const [activity, setActivity] = useState<Activity>(initialState)
 
     /**
      * Código que corre cuando se cambia la información de un input en el formulario.
@@ -52,8 +61,21 @@ export default function Form() {
         return category === 1 ? "Guardar comida" : "Guardar ejercicio"
     }
 
+    const handleSubmit = (e : React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+
+        dispatch({ type: 'save-activity', payload: {newActivity: activity} })
+        setActivity({
+            ...initialState,
+            id: uuidv4() // para generar un nuevo id al añadir una actividad
+        })
+    }
+
     return (
-    <form className="space-y-4 m-4 py-4 p-12 border border-cyan-900 rounded-3xl">
+    <form
+        className="space-y-4 m-4 py-4 p-12 border border-cyan-900 rounded-3xl"
+        onSubmit={handleSubmit}
+    >
         <div>
             <label htmlFor="category" className="text-cyan-900 font-bold">Categoría</label><br/>
             <select
